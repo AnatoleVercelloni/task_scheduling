@@ -1,0 +1,26 @@
+
+
+
+un lien avec plein de trucs;
+https://homepages.laas.fr/lopez/publis/PAPERS/gotha93.pdf#:~:text=Une%20mani%C3%A8re%20de%20simplifier%20les%20probl%C3%A8mes,qui%20fait%20l%27objet%20de%20cet%20article.&text=Une%20mani%C3%A8re%20de%20simplifier,l%27objet%20de%20cet%20article.&text=de%20simplifier%20les%20probl%C3%A8mes,qui%20fait%20l%27objet%20de
+
+
+
+le pb c'est:
+on a un paquet de taches qui:
+	- ont toutes la même durée
+	- dependent de l'execution de certaines tâches
+	(on connait pour chaque tache l'ensemble des tâches qui doivent
+	être fait avant) (ou après?)
+	
+du coup:
+On fait un graphe pour modéliser tout ça:
+	-les noeuds représentent les tâches
+	-les arêtes orientées représentent les dépendences
+
+un noeud est constitué:
+	-un identifiant unique pour éviter les doublons
+	-un pointeur vers un vecteur d'entier (pour les dépendances)
+	
+
+
