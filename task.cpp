@@ -1,5 +1,5 @@
 #include "task.hpp"
-
+#include <algorithm>
 
 using namespace std;
 
@@ -26,6 +26,11 @@ int& Task::getDur() {
 void Task::push(int& id) {
 	next->push_back(id);
 }
+
+bool Task::operator==(const Task& t){
+	return id == t.id;
+}
+	
 
 ostream& operator<<(ostream& o, const Task& t) {
 	o << "Id = " << t.id << "\t" << "duration = " << t.duration;
@@ -130,7 +135,7 @@ void ListTask::visit(Task& t, vector<int>& v){
 
 vector<int> ListTask::topoSort(){
 	vector<int> v = {};
-	cout << "le début" << endl;
+	cout << "start topo_sort" << endl << endl;
 	for (auto& t: data){
 		// cout << "v : " << v;
 		// cout << *this; 
@@ -193,17 +198,20 @@ void  ListTask::erase_task(Task& task){
 }
 	
 	
-ListTask ListTask::multi_process_scheduling (){
+ListTask ListTask::multi_process_scheduling (const string& filename){
+	ofstream file(filename);
 	ListTask L = (*this).invert();
 	// cout << "L " << L;
 	vector<Task> temp;
 	int inc = 0;
 	for (int i = 1; i < size; i++){
+		file << i << " |";
 		temp = {};
 		for (auto& t : L.data){
 			// cout << t << endl;
 			if ((*t.getNext()).empty()){
 				t.getVis() = i;
+			    file << "\t" << t.getId();
 				// L.erase_task(t);
 				temp.push_back(t);
 				inc++;
@@ -213,6 +221,7 @@ ListTask ListTask::multi_process_scheduling (){
 			L.erase_task(t);
 		}
 		if ( inc >= size) break;
+	file << endl;
 	}
 	return L;
 }
@@ -229,26 +238,28 @@ ListTask ListTask::multi_process_scheduling_duration(const string& filename){
 		// temp = {};
 		file << i;
 		for (auto& t : L.data){
+			auto p = std::find(temp.begin(), temp.end(), t);
 			// cout << t << endl;
-			if ((*t.getNext()).empty()){
+			if ((*t.getNext()).empty() && p == temp.end()){
 				t.getVis() = i;
 				// L.erase_task(t);
 				temp.push_back(t);
-				file << "\t" << t.getId();
+				file << "\tdébut de " << t.getId();
 				inc++;
 			}
 		}
 		for (auto it =  temp.begin(); it != temp.end(); ) {
 			(*it).getDur() -= 1;
-			if ((*it).getDur() <= 0){
+			cout << *it << (*it).getDur()  << endl;
+			if ((*it).getDur() <= -1){
 				L.erase_task(*it);
-				temp.erase(it);
 				file << "\t fin de " << (*it).getId();
+				temp.erase(it);
 			}else{
 				it++;
 			}
 		}
-		if ( inc >= size) break;
+		if ( inc >= size && temp.empty())  break;
 		file << endl;
 	}
 	// write_solution(filename, L);
@@ -276,5 +287,17 @@ ostream &operator<<(ostream &o, vector<int> &v){
 	return o << endl;
 }
 
-
-// int check(
+// int ListTask::check_path(Task& u, Task& v){
+	// deque <int> queue(size);
+	// queue.push_front(u);
+	// while (file){
+		// Task cour = queue.back();
+		// queue.pop_back();
+		// cour.getVis() = 1;
+		// for (auto& i : *cour.getNext()){
+			// if (i
+		
+	
+// int ListTask::check_acyclic(){
+	// vector<int> file(size);
+	// file.push_back(

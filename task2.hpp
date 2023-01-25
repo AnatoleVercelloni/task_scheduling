@@ -10,12 +10,11 @@ class Task{
 	int id;
 	int duration;
 	int visited;
-	vector<int>* next;
+	vector<Task> next;
 	
 	public:
 	Task(int& id, int duration = 1);
-	bool operator==(const Task& t);
-	vector<int>* getNext();
+	vector<Task> getNext();
 	int getId();
 	int& getVis();
 	int& getDur();
