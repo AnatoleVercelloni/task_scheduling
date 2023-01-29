@@ -7,12 +7,14 @@
 using namespace std;
 
 class Task{
+	
 	int id;
 	int duration;
 	int visited;
 	vector<int>* next;
 	
 	public:
+	
 	Task(int& id, int duration = 1);
 	bool operator==(const Task& t);
 	vector<int>* getNext();
@@ -21,15 +23,15 @@ class Task{
 	int& getDur();
 	void push(int& id);
 	friend ostream& operator<<(ostream& o, const Task& t);
-	// friend void ListTask::visit(Task& t, vector<int>& v);
 };
 
 class ListTask {
+	
 	int size;
 	vector<Task> data;
-	int tmax;
 	
 	public:
+	
 	ListTask();
 	void loadListTask(const string& filename);
 	void insert(Task& t);
@@ -41,7 +43,6 @@ class ListTask {
 	void  erase_task(Task& task);
 	ListTask multi_process_scheduling(const string& filename);
 	ListTask multi_process_scheduling_duration(const string& filename);
-	// int check(ListeTask& Lt);
 };
 
 

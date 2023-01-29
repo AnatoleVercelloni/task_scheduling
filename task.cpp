@@ -43,7 +43,7 @@ ostream& operator<<(ostream& o, const Task& t) {
 	return o;
 }
 
-ListTask::ListTask():size(0),data({}), tmax(1){}
+ListTask::ListTask():size(0),data({}){}
 
 void ListTask::insert(Task& t) {
 	size = size + 1;
@@ -51,13 +51,12 @@ void ListTask::insert(Task& t) {
 }
 
 void ListTask::loadListTask(const string& filename) {
-	//time = 0 -> all the duration are the same
-	//time = 1 -> different duration
+	/*time = 0 -> all the duration are the same
+	time = 1 -> different duration*/
 	int time;
-	tmax = 1;
 	ifstream file(filename);
 	if (file) {
-		cout << "ouverture du fichier" << endl;
+		cout << "ouverture du fichier: ok" << endl;
 		int size;
 		file >> size;
 		file >> time;
@@ -71,7 +70,6 @@ void ListTask::loadListTask(const string& filename) {
 			iss >> id;
 			if (time == 1){
 				iss >> duration;
-				if (duration > tmax) tmax = duration;
 			}else{
 				duration = 1;
 			}
@@ -88,23 +86,18 @@ void ListTask::loadListTask(const string& filename) {
 }
 
 int ListTask::find(int& id){
-	// cout << "début find" << endl;
 	int i = 0;
 	for (auto t : data){
-		// cout << t << endl;
 		if (t.getId() == id){
-			// cout << "trouvééé" << endl;
 			return i;
 		}
 		i ++;
 	}
-	// cout << "problem find" << endl;
 	return -1;
 }
 
 	
 ostream &operator<<(ostream& o, const ListTask& Lt) {
-	o << "tmax = " << Lt.tmax << "\t";
 	o << "size = " << Lt.size << endl;
 	for (auto t : Lt.data) {
 		o << t;
@@ -115,34 +108,24 @@ ostream &operator<<(ostream& o, const ListTask& Lt) {
 
 void ListTask::visit(Task& t, vector<int>& v){
 	t.getVis() = 2;
-	// cout << "getVis()" << t.getVis() << endl;
-	// cout << *this;
 	for (auto& id : (*t.getNext())){
-		// cout << id << endl;
 		Task& u = data[(*this).find(id)];
-		// cout << "après le find" << endl;
 		if (u.getVis() == 0){
 			visit(u, v);
 		}
 	}
-	// cout << "t : " << t.getId()	<< endl;
 	t.getVis() = 1;
-	// cout << *this;
 	v.insert(v.begin(), t.getId());
-	// v.push_back(t.getId());
 }
 
 
 vector<int> ListTask::topoSort(){
+	cout << "L: " << endl  << *(this);
 	vector<int> v = {};
-	cout << "start topo_sort" << endl << endl;
+	cout << "topological_sort" << endl << endl;
 	for (auto& t: data){
-		// cout << "v : " << v;
-		// cout << *this; 
 		if (t.getVis() == 0){
-			// cout << "avant visit" << endl;
 			(*this).visit(t, v);
-			// cout << "après visit" << endl;
 		}
 	}
 	return v;
@@ -150,17 +133,17 @@ vector<int> ListTask::topoSort(){
 	
 ListTask	ListTask::invert(){
 	ListTask L;
-	L.tmax = tmax;
-	for (auto& t : data){
-		// cout << L;
+	for (auto& t : data){	
 		int id = t.getId();
 		int duration = t.getDur();
 		int index = L.find(id);
+		
 		if (index == -1){
 			Task tmp(id, duration);
 			L.insert(tmp);
 		}
 		else L.data[index].getDur() = duration;
+		
 		for (auto& i : *t.getNext()){
 			Task _t(i);
 			int f = L.find(i);
@@ -180,17 +163,12 @@ ListTask	ListTask::invert(){
 void  ListTask::erase_task(Task& task){
 	// task should be present inside the ListTask
 		int id = task.getId();
-		// data.erase((*this).find(id).get_allocator());
-		// std::erase(data, task);
 		(*task.getNext()).push_back(-1);
 		for (auto& t : data){
 			vector<int>* array = t.getNext();
 			for (auto it = array->begin(); it != array->end();){
 				if (*it == id){
-					// cout << t << endl;
-					// cout << id << endl;
 					(*t.getNext()).erase(it);
-					// cout << t << endl;
 				}
 				else it++;
 			}
@@ -200,19 +178,18 @@ void  ListTask::erase_task(Task& task){
 	
 ListTask ListTask::multi_process_scheduling (const string& filename){
 	ofstream file(filename);
+	cout << "L: " << endl  << *(this);
+	cout << "multi_process_scheduling " << endl;
 	ListTask L = (*this).invert();
-	// cout << "L " << L;
 	vector<Task> temp;
 	int inc = 0;
 	for (int i = 1; i < size; i++){
 		file << i << " |";
 		temp = {};
 		for (auto& t : L.data){
-			// cout << t << endl;
 			if ((*t.getNext()).empty()){
 				t.getVis() = i;
 			    file << "\t" << t.getId();
-				// L.erase_task(t);
 				temp.push_back(t);
 				inc++;
 			}
@@ -223,26 +200,26 @@ ListTask ListTask::multi_process_scheduling (const string& filename){
 		if ( inc >= size) break;
 	file << endl;
 	}
+	cout << "result registered in " << filename << endl << endl;
 	return L;
 }
 	
 
 	
 ListTask ListTask::multi_process_scheduling_duration(const string& filename){
+	cout << "L :" << endl  << *(this);
+	cout << "multi_process_scheduling_duration " << endl;
 	ofstream file(filename);
 	ListTask L = (*this).invert();
-	cout << "L " << L;
 	vector<Task> temp;
 	int inc = 0;
-	for (int i = 1; i < size * tmax; i++){
-		// temp = {};
+	int i = 1;
+	while (!temp.empty() || inc < size ){ 
 		file << i;
 		for (auto& t : L.data){
 			auto p = std::find(temp.begin(), temp.end(), t);
-			// cout << t << endl;
 			if ((*t.getNext()).empty() && p == temp.end()){
 				t.getVis() = i;
-				// L.erase_task(t);
 				temp.push_back(t);
 				file << "\tdébut de " << t.getId();
 				inc++;
@@ -250,7 +227,6 @@ ListTask ListTask::multi_process_scheduling_duration(const string& filename){
 		}
 		for (auto it =  temp.begin(); it != temp.end(); ) {
 			(*it).getDur() -= 1;
-			cout << *it << (*it).getDur()  << endl;
 			if ((*it).getDur() <= -1){
 				L.erase_task(*it);
 				file << "\t fin de " << (*it).getId();
@@ -259,28 +235,14 @@ ListTask ListTask::multi_process_scheduling_duration(const string& filename){
 				it++;
 			}
 		}
-		if ( inc >= size && temp.empty())  break;
+		i ++;
 		file << endl;
 	}
-	// write_solution(filename, L);
+	cout << "result registered in " << filename << endl << endl;
 	return L;
 }
 
 
-
-// ListTask ListTask::multi_process_scheduling (){
-	// ListTask L = (*this).invert();
-	// int inc = 0;
-	// vector<int> array;
-	// vector<int> temp;
-	// for (int i = 0; i < size; i++) {
-		// for (auto& t : L.data) {
-			// for (auto& it = (*t.getNext()).begin(); it < (*t.getNext()).end(); it++) {
-				
-			// }
-		// }	
-	// }
-// }
 
 ostream &operator<<(ostream &o, vector<int> &v){
 	for (const auto& uj:v){ o << uj << "\t";}
