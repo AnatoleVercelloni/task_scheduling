@@ -1,10 +1,15 @@
 #include "task.hpp"
-#include <algorithm>
 
 using namespace std;
 
-Task::Task(int& id, int duration):id(id),visited(0), duration(duration){
+Task::Task(const int& id, int duration):id(id),visited(0), duration(duration){
 	next = new vector<int>;
+}
+
+Task Task::operator= (const Task& t) {
+	Task tnew(t.id, t.duration);
+	*tnew.next = *t.next;
+	return tnew;
 }
 
 vector<int>* Task::getNext(){
@@ -131,7 +136,7 @@ vector<int> ListTask::topoSort(){
 	return v;
 }
 	
-ListTask	ListTask::invert(){
+ListTask ListTask::invert(){
 	ListTask L;
 	for (auto& t : data){	
 		int id = t.getId();
@@ -145,15 +150,17 @@ ListTask	ListTask::invert(){
 		else L.data[index].getDur() = duration;
 		
 		for (auto& i : *t.getNext()){
-			Task _t(i);
 			int f = L.find(i);
 			if (f == -1){
+				Task _t(i);
 				L.insert(_t);
+				_t.push(id);
 			}
 			else {
-				_t = L.data[f];
+				// _t = L.data[f];
+				L.data[f].push(id);
+
 			}
-			_t.push(id);
 		}
 	}
 	return L;
